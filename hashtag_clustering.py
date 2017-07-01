@@ -6,14 +6,15 @@ import os
 import json
 import pickle
 
-S_DIR = '/Users/Kellie/Desktop/'
-D_DIR = '/Users/Kellie/Desktop/'
+# location of tweet data
+data_source_directory = './data/hash_mention.json'
 
-with open(os.path.join(S_DIR, 'hash_mention.json'), 'rb') as rf:
+# load tweet data as an object
+with open(os.path.join(data_source_directory, 'hash_mention.json'), 'rb') as raw_tweet_data:
 
-    hash_mention = json.load(rf)
+    hash_mention = json.load(raw_tweet_data)
 
-full_list = []
+total_hashtags_and_mentions = []
 
 for user in hash_mention:
 
