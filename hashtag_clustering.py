@@ -17,13 +17,13 @@ def create_initial_data_structure(input_data_file):
         # list that each individual user id
         unique_user_id_list = users_list_and_terms_list[1]
    
-        for p in every_mention_every_term_list: print(p)
+        # for p in every_mention_every_term_list: print(p)
 
         # create a set to hold each term ** only once **
-        # unique_term_set = create_set(every_mention_every_term_list)
+        unique_term_set = create_set(every_mention_every_term_list)
         
         # generate zero vector, one zero corresponds to one unique term
-        # zero_vector = term_vector_generator(unique_term_set)
+        zero_vector = term_vector_generator(unique_term_set)
 
 
 
