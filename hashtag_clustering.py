@@ -31,21 +31,16 @@ def associate_terms_with_user(unique_term_set, all_users_terms_dict):
     # consider the first user
     for user_id in all_users_terms_dict:
 
-        print(user_id)
-
         # what terms *could* this user have possibly used
         this_user_zero_vector = []
+
 
         # this could be refactored somehow
         for term in  unique_term_set:
             this_user_zero_vector.extend('0')
 
-        print("what terms *could* this user have possibly used: ", this_user_zero_vector, '\n')
-
         # what terms *did* this user use
         terms_belong_to_this_user = all_users_terms_dict.get(user_id)
-
-        print("what terms *did* this user use: ", terms_belong_to_this_user, '\n')
 
         # let's start counting all the possible terms that this term in the personal
         # user list of words could correspond to... 
@@ -54,14 +49,11 @@ def associate_terms_with_user(unique_term_set, all_users_terms_dict):
         # while this one term is in the range of all possible terms
         while global_term_element_index < len(unique_term_set):
 
-            # start count
-            ing the number of terms he used
+            # start counting the number of terms he used
             local_term_set_item_index = 0
 
             # if this one term he used is still in the range of terms he used, counting them one by one
             while local_term_set_item_index < len(terms_belong_to_this_user):
-
-                print('\t',list(unique_term_set)[global_term_element_index])
 
                 # if this one user term is the same as this one global term
                 if list(unique_term_set)[global_term_element_index] == terms_belong_to_this_user[local_term_set_item_index]:
