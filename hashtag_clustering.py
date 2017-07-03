@@ -16,38 +16,68 @@ def create_initial_data_structure(input_data_file):
 
         # list that each individual user id
         unique_user_id_list = users_list_and_terms_list[1]
-   
-        # for p in every_mention_every_term_list: print(p)
 
         # create a set to hold each term ** only once **
         unique_term_set = create_set(every_mention_every_term_list)
         
-        # generate zero vector, one zero corresponds to one unique term
-        zero_vector = term_vector_generator(unique_term_set)
+
+        associate_terms_with_user(unique_term_set, all_users_terms_dict)
 
 
+def associate_terms_with_user(unique_term_set, all_users_terms_dict):
 
-        
-        new_test_dict = spawn_user_zero_vector_dict(zero_vector, unique_user_id_list)
+    associated_value_return_dict = {}
 
-        for k,v in new_test_dict.items():
-            print(k, v)
+    # consider the first user
+    for user_id in all_users_terms_dict:
 
+        print(user_id)
 
+        # what terms *could* this user have possibly used
+        this_user_zero_vector = []
 
-def spawn_user_zero_vector_dict(zero_vector, unique_user_id_list):
-    
-    user_zero_vector_dict =  {}
-    index_tracker = 0
-    number_of_users = len(unique_user_id_list) - 1
+        # this could be refactored somehow
+        for term in  unique_term_set:
+            this_user_zero_vector.extend('0')
 
-    while index_tracker <= number_of_users:
-        
-        user_zero_vector_dict.update({ unique_user_id_list[index_tracker] : zero_vector})
+        print("what terms *could* this user have possibly used: ", this_user_zero_vector, '\n')
 
-        index_tracker += 1
+        # what terms *did* this user use
+        terms_belong_to_this_user = all_users_terms_dict.get(user_id)
 
-    return user_zero_vector_dict
+        print("what terms *did* this user use: ", terms_belong_to_this_user, '\n')
+
+        # let's start counting all the possible terms that this term in the personal
+        # user list of words could correspond to... 
+        global_term_element_index = 0
+
+        # while this one term is in the range of all possible terms
+        while global_term_element_index < len(unique_term_set):
+
+            # start count
+            ing the number of terms he used
+            local_term_set_item_index = 0
+
+            # if this one term he used is still in the range of terms he used, counting them one by one
+            while local_term_set_item_index < len(terms_belong_to_this_user):
+
+                print('\t',list(unique_term_set)[global_term_element_index])
+
+                # if this one user term is the same as this one global term
+                if list(unique_term_set)[global_term_element_index] == terms_belong_to_this_user[local_term_set_item_index]:
+
+                    # increment the number of times this user used this term
+                    this_user_zero_vector[global_term_element_index] = '1'
+
+                # go to the next term for this user
+                local_term_set_item_index += 1
+
+            # go to the next term in the global list of all possible terms
+            global_term_element_index += 1
+
+        associated_value_return_dict.update({user_id: this_user_zero_vector})
+
+    pprint.pprint(associated_value_return_dict)
 
 
 def generate_complete_terms_list_and_users_list(all_users_terms_dict):
@@ -71,22 +101,10 @@ def create_set(complete_terms_list):
     return term_set
 
 
-def term_vector_generator(unique_term_set):
-
-    term_vector = []
-
-    for term in  unique_term_set:
-        term_vector.extend('0')
-
-    return term_vector
-
-
-
-
 def main():
 
     # define input data file
-    input_data_file = './data/toy_data.json'
+    input_data_file = './data/toy_toy_data.json'
     
     # generate data structure
     create_initial_data_structure(input_data_file)
@@ -94,16 +112,6 @@ def main():
 if __name__ == "__main__":
     main()
     
-    
-
-
-
-
-
-
-
-
-
 
 
 
