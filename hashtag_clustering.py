@@ -27,8 +27,27 @@ def create_initial_data_structure(input_data_file):
 
 
 
-# def spawn_user_zero_vector_dict(zero_vector, ):
+        
+        new_test_dict = spawn_user_zero_vector_dict(zero_vector, unique_user_id_list)
 
+        for k,v in new_test_dict.items():
+            print(k, v)
+
+
+
+def spawn_user_zero_vector_dict(zero_vector, unique_user_id_list):
+    
+    user_zero_vector_dict =  {}
+    index_tracker = 0
+    number_of_users = len(unique_user_id_list) - 1
+
+    while index_tracker <= number_of_users:
+        
+        user_zero_vector_dict.update({ unique_user_id_list[index_tracker] : zero_vector})
+
+        index_tracker += 1
+
+    return user_zero_vector_dict
 
 
 def generate_complete_terms_list_and_users_list(all_users_terms_dict):
@@ -58,6 +77,8 @@ def term_vector_generator(unique_term_set):
 
     for term in  unique_term_set:
         term_vector.extend('0')
+
+    return term_vector
 
 
 
