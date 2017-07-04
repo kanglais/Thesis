@@ -1,5 +1,6 @@
 import pprint
 import json
+import numpy as np
 
 def create_initial_data_structure(input_data_file):
     # load tweet data as an object
@@ -21,7 +22,37 @@ def create_initial_data_structure(input_data_file):
         unique_term_set = create_set(every_mention_every_term_list)
         
 
-        associate_terms_with_user(unique_term_set, all_users_terms_dict)
+        associated_value_return_dict = associate_terms_with_user(unique_term_set, all_users_terms_dict)
+
+#         matrix_of_associated_values = matrix_creation(associated_value_return_dict)
+
+#         normalize_associated_term_values(matrix_of_associated_values)
+
+
+# def normalize_associated_term_values(matrix_of_associated_values):
+
+#     normalized_matrix = []
+
+#     sum_of_all_terms =  []
+
+#     for line in matrix_of_associated_values:
+#         array_sum = sum(line)
+
+#     #print(sum_of_all_terms)   
+
+# def matrix_creation(associated_value_return_dict):
+
+#     matrix_of_associated_values = []
+
+#     for user in associated_value_return_dict:
+#         matrix_of_associated_values.append(associated_value_return_dict[user])
+
+#     matrix_of_associated_values = np.matrix(matrix_of_associated_values)
+
+#     print(matrix_of_associated_values)
+
+#     return matrix_of_associated_values
+
 
 
 def associate_terms_with_user(unique_term_set, all_users_terms_dict):
@@ -37,7 +68,11 @@ def associate_terms_with_user(unique_term_set, all_users_terms_dict):
 
         # this could be refactored somehow
         for term in  unique_term_set:
-            this_user_zero_vector.extend('0')
+            # this_user_zero_vector.extend(0)
+
+            this_user_zero_vector.insert( len(this_user_zero_vector) ,0)
+            #to create array of zeros:
+            #np.zeros(this_user_zero_vector)
 
         # what terms *did* this user use
         terms_belong_to_this_user = all_users_terms_dict.get(user_id)
@@ -59,7 +94,7 @@ def associate_terms_with_user(unique_term_set, all_users_terms_dict):
                 if list(unique_term_set)[global_term_element_index] == terms_belong_to_this_user[local_term_set_item_index]:
 
                     # increment the number of times this user used this term
-                    this_user_zero_vector[global_term_element_index] = '1'
+                    this_user_zero_vector[global_term_element_index] += 1
 
                 # go to the next term for this user
                 local_term_set_item_index += 1
@@ -69,7 +104,9 @@ def associate_terms_with_user(unique_term_set, all_users_terms_dict):
 
         associated_value_return_dict.update({user_id: this_user_zero_vector})
 
-    pprint.pprint(associated_value_return_dict)
+    pprint.pprint( associated_value_return_dict )
+    return associated_value_return_dict
+
 
 
 def generate_complete_terms_list_and_users_list(all_users_terms_dict):
