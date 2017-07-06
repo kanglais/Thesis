@@ -1,6 +1,9 @@
 import pprint
 import json
 import numpy as np
+from sklearn import preprocessing
+
+#split into smaller ones and dump into pickles
 
 def create_initial_data_structure(input_data_file):
     # load tweet data as an object
@@ -21,38 +24,35 @@ def create_initial_data_structure(input_data_file):
         # create a set to hold each term ** only once **
         unique_term_set = create_set(every_mention_every_term_list)
         
-
+        #create a dict to hold 0's or 1's based on which terms the user used
         associated_value_return_dict = associate_terms_with_user(unique_term_set, all_users_terms_dict)
 
-#         matrix_of_associated_values = matrix_creation(associated_value_return_dict)
+        #transform the above dict into a matrix
+        matrix_of_associated_values = matrix_creation(associated_value_return_dict)
 
-#         normalize_associated_term_values(matrix_of_associated_values)
+        #normalize matrix
+        normalized_matrix = normalize_associated_term_values(matrix_of_associated_values)
 
+    return normalized_matrix
 
-# def normalize_associated_term_values(matrix_of_associated_values):
+def normalize_associated_term_values(matrix_of_associated_values):
 
-#     normalized_matrix = []
+    matrix_as_float = matrix_of_associated_values.astype(float)
 
-#     sum_of_all_terms =  []
+    normalized_matrix = preprocessing.normalize(matrix_as_float)
 
-#     for line in matrix_of_associated_values:
-#         array_sum = sum(line)
+    return normalized_matrix   
 
-#     #print(sum_of_all_terms)   
+def matrix_creation(associated_value_return_dict):
 
-# def matrix_creation(associated_value_return_dict):
+    matrix_of_associated_values = []
 
-#     matrix_of_associated_values = []
+    for user in associated_value_return_dict:
+        matrix_of_associated_values.append(associated_value_return_dict[user])
 
-#     for user in associated_value_return_dict:
-#         matrix_of_associated_values.append(associated_value_return_dict[user])
+    matrix_of_associated_values = np.matrix(matrix_of_associated_values)
 
-#     matrix_of_associated_values = np.matrix(matrix_of_associated_values)
-
-#     print(matrix_of_associated_values)
-
-#     return matrix_of_associated_values
-
+    return matrix_of_associated_values
 
 
 def associate_terms_with_user(unique_term_set, all_users_terms_dict):
@@ -104,9 +104,7 @@ def associate_terms_with_user(unique_term_set, all_users_terms_dict):
 
         associated_value_return_dict.update({user_id: this_user_zero_vector})
 
-    pprint.pprint( associated_value_return_dict )
     return associated_value_return_dict
-
 
 
 def generate_complete_terms_list_and_users_list(all_users_terms_dict):
@@ -133,7 +131,7 @@ def create_set(complete_terms_list):
 def main():
 
     # define input data file
-    input_data_file = './data/toy_toy_data.json'
+    input_data_file = './data/toy_data.json'
     
     # generate data structure
     create_initial_data_structure(input_data_file)
