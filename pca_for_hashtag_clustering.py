@@ -1,6 +1,7 @@
-import hashtag_clustering
+import create_hashtag_mention_matrix
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from sklearn import decomposition
 from sklearn.cluster import KMeans
 import numpy as np
 import pylab as pl
@@ -8,8 +9,8 @@ import pylab as pl
 
 def create_matrix_with_pca_and_kmeans(normalized_matrix):
 
-	X_std = create_standardized_matrix(normalized_matrix)
-
+    X_std = create_standardized_matrix(normalized_matrix)
+    
     pca = decomposition.PCA(n_components=2)
     pca.fit(X_std.data)
     PCA(copy=True, n_components=2, whiten=False)
@@ -18,8 +19,10 @@ def create_matrix_with_pca_and_kmeans(normalized_matrix):
     kmeans = KMeans(n_clusters=2, random_state=0)
     kmeans.fit(X)
     
-    pl.scatter(X[:, 0], X[:, 1], c=kmeans.labels_)
-    pl.show()
+    print(kmeans)
+
+    #pl.scatter(X[:, 0], X[:, 1], c=kmeans.labels_)
+    #pl.show()
 
 def create_standardized_matrix(normalized_matrix):
 
@@ -33,7 +36,7 @@ def main():
 	input_data_file = './data/toy_data.json'
     
     # access hashtag_clustering file, data from file to use in this script
-	create_matrix_with_pca_and_kmeans( hashtag_clustering.create_initial_data_structure(input_data_file) )
+	create_matrix_with_pca_and_kmeans( create_hashtag_mention_matrix.create_initial_data_structure(input_data_file) )
 
 if __name__ == "__main__":
     main()
