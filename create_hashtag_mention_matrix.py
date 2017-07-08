@@ -30,10 +30,11 @@ def create_initial_data_structure(input_data_file):
         #transform the above dict into a matrix
         matrix_of_associated_values = matrix_creation(associated_value_return_dict)
 
-        #normalize matrix
-        normalized_matrix = normalize_associated_term_values(matrix_of_associated_values)
 
-    return normalized_matrix
+    #     #normalize matrix
+    #     normalized_matrix = normalize_associated_term_values(matrix_of_associated_values)
+
+    # return normalized_matrix
 
 def normalize_associated_term_values(matrix_of_associated_values):
 
@@ -51,6 +52,12 @@ def matrix_creation(associated_value_return_dict):
         matrix_of_associated_values.append(associated_value_return_dict[user])
 
     matrix_of_associated_values = np.matrix(matrix_of_associated_values)
+
+    column_sums = sum(matrix_of_associated_values)
+
+    matrix_without_low_values = [matrix_of_associated_values[:, np.where(column_sums > 2)]]
+
+    print(matrix_without_low_values)
 
     return matrix_of_associated_values
 
