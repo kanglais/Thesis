@@ -1,14 +1,39 @@
 import numpy as np 
-from numpy import *
-
+import json
 from collections import defaultdict
+from urllib.parse import urlparse
+from collections import Counter
+
+
+# define input data file
+input_data_file = './data/only_urls copy.json'
+
+# load tweet data as an object
+with open(input_data_file, 'rb') as only_urls:
+
+    # generate python dict from raw json data
+    all_urls_dict = json.load(only_urls)
+
+
+
+root_urls = []
+
+for users in all_urls_dict: 
+    for url in all_urls_dict[users]:
+        url_item = url
+        o = urlparse(url_item)
+        root_urls.append(o.hostname)
+
+dict_of_url_counts = {}
 
 freqs = Counter(root_urls)
-#print(freqs)
+
+dict_of_url_counts.update(freqs)
 
 most_common_urls = (defaultdict(list))
 
-for word, count in freqs.most_common(100):
+
+for word, count in freqs.most_common(500):
     most_common_urls[word].append(count)
     for url in most_common_urls: 
         if 'breitbart' in url: 
@@ -112,82 +137,72 @@ for word, count in freqs.most_common(100):
             most_common_urls[url].append(bias)
 
 
-import matplotlib.pylab as plt
+# import matplotlib.pylab as plt
 
 
-for item in most_common_urls.items():
-    label = item[0]
-    data = item[1]
-    for i in data: 
-        x = data[0]
-        y = data[1]
-        plt.scatter(x, y, color='blue', marker='*')
+# for item in most_common_urls.items():
+#     label = item[0]
+#     data = item[1]
+#     for i in data: 
+#         x = data[0]
+#         y = data[1]
+#         plt.scatter(x, y, color='blue', marker='*')
         
-plt.xlabel('Frequency of Tweets')
-plt.ylabel('Bias: Conservative to Liberal')
+# plt.xlabel('Frequency of Tweets')
+# plt.ylabel('Bias: Conservative to Liberal')
 
 
-plt.show()
+# plt.show()
 
-for item in most_common_urls.items():
-    label = item[0]
-    data = item[1]
-    for i in data:
-        if data[1]>0: 
-            x = data[0]
-            y = data[1]
-            plt.scatter(x, y, color='blue', marker='*')
-        plt.annotate(label, xy = (x, y))
+# for item in most_common_urls.items():
+#     label = item[0]
+#     data = item[1]
+#     for i in data:
+#         if data[1]>0: 
+#             x = data[0]
+#             y = data[1]
+#             plt.scatter(x, y, color='blue', marker='*')
+#         plt.annotate(label, xy = (x, y))
         
-plt.xlabel('Frequency of Tweets')
-plt.ylabel('Bias: Conservative')
-plt.title('Conservative Tweets')
+# plt.xlabel('Frequency of Tweets')
+# plt.ylabel('Bias: Conservative')
+# plt.title('Conservative Tweets')
 
 
-plt.show()
+# plt.show()
 
-for item in most_common_urls.items():
-    label = item[0]
-    data = item[1]
-    for i in data:
-        if data[1]<0: 
-            x = data[0]
-            y = data[1]
-            plt.scatter(x, y, color='blue', marker='*')
-    plt.annotate(label, xy = (x, y))
+# for item in most_common_urls.items():
+#     label = item[0]
+#     data = item[1]
+#     for i in data:
+#         if data[1]<0: 
+#             x = data[0]
+#             y = data[1]
+#             plt.scatter(x, y, color='blue', marker='*')
+#     plt.annotate(label, xy = (x, y))
         
-plt.xlabel('Frequency of Tweets')
-plt.ylabel('Bias: Liberal')
-plt.title('Liberal Tweets')
+# plt.xlabel('Frequency of Tweets')
+# plt.ylabel('Bias: Liberal')
+# plt.title('Liberal Tweets')
 
 
-plt.show()
+# plt.show()
 
-for item in most_common_urls.items():
-    label = item[0]
-    data = item[1]
-    for i in data:
-        #excludes twitter bc there are too many links // messes w graph
-        if data[1]==0 and data[0]<40000: 
-            x = data[1]
-            y = data[0]
-            plt.scatter(x, y, color='blue', marker='*')
-    plt.annotate(label, xy = (x, y))
+# for item in most_common_urls.items():
+#     label = item[0]
+#     data = item[1]
+#     for i in data:
+#         #excludes twitter bc there are too many links // messes w graph
+#         if data[1]==0 and data[0]<40000: 
+#             x = data[1]
+#             y = data[0]
+#             plt.scatter(x, y, color='blue', marker='*')
+#     plt.annotate(label, xy = (x, y))
         
-plt.xlabel('Frequency of Tweets')
-plt.ylabel('Bias = 0')
-plt.title('UnBiased Tweets')
+# plt.xlabel('Frequency of Tweets')
+# plt.ylabel('Bias = 0')
+# plt.title('UnBiased Tweets')
 
 
-plt.show()
-
-from collections import Counter
-
-hashtags = []
-
-for doc in collection.find({'hashtags': {'$exists' : 'true'}}):
-    hashtags.append(doc['hashtags'])
-
-#print(collection.find({'hashtags': {'$exists' : 'true'}}).count())
-print(hashtags)
+# plt.show()
 

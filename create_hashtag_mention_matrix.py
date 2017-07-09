@@ -51,13 +51,15 @@ def matrix_creation(associated_value_return_dict):
     for user in associated_value_return_dict:
         matrix_of_associated_values.append(associated_value_return_dict[user])
 
-    matrix_of_associated_values = np.matrix(matrix_of_associated_values)
+    matrix_of_associated_values = np.array(matrix_of_associated_values)
 
-    column_sums = sum(matrix_of_associated_values)
+    column_sums = np.sum(matrix_of_associated_values, axis=0)
 
-    matrix_without_low_values = [matrix_of_associated_values[:, np.where(column_sums > 2)]]
+    new_columns = np.where(column_sums > np.sum(column_sums)*.001)[0]
 
-    print(matrix_without_low_values)
+    print(len(new_columns))
+
+    matrix_without_low_values = matrix_of_associated_values[:, new_columns]
 
     return matrix_of_associated_values
 
@@ -138,7 +140,7 @@ def create_set(complete_terms_list):
 def main():
 
     # define input data file
-    input_data_file = './data/toy_data.json'
+    input_data_file = './data/hash_mention.json'
     
     # generate data structure
     create_initial_data_structure(input_data_file)
