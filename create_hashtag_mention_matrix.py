@@ -2,6 +2,11 @@ import pprint
 import json
 import numpy as np
 from sklearn import preprocessing
+from sklearn import cluster
+import numpy as np
+from matplotlib import pyplot
+import os
+import pickle
 
 #split into smaller ones and dump into pickles
 
@@ -23,18 +28,20 @@ def create_initial_data_structure(input_data_file):
 
         # create a set to hold each term ** only once **
         unique_term_set = create_set(every_mention_every_term_list)
+
+        unique_terms_list = unique_term_list(unique_term_set)
         
         #create a dict to hold 0's or 1's based on which terms the user used
-        associated_value_return_dict = associate_terms_with_user(unique_term_set, all_users_terms_dict)
+        #save this one, then run everything on it?
+        associated_value_return_list = associate_terms_with_user(unique_term_set, all_users_terms_dict)
 
         #transform the above dict into a matrix
-        matrix_of_associated_values = matrix_creation(associated_value_return_dict)
+        matrix_of_associated_values = matrix_creation(associated_value_return_list)
 
+        #normalize matrix
+        normalized_matrix = normalize_associated_term_values(matrix_of_associated_values)
 
-    #     #normalize matrix
-    #     normalized_matrix = normalize_associated_term_values(matrix_of_associated_values)
-
-    # return normalized_matrix
+    return normalized_matrix
 
 def normalize_associated_term_values(matrix_of_associated_values):
 
@@ -44,76 +51,46 @@ def normalize_associated_term_values(matrix_of_associated_values):
 
     return normalized_matrix   
 
-def matrix_creation(associated_value_return_dict):
+def matrix_creation(associated_value_return_list):
 
     matrix_of_associated_values = []
 
-    for user in associated_value_return_dict:
-        matrix_of_associated_values.append(associated_value_return_dict[user])
+    for user in associated_value_return_list:
+        matrix_of_associated_values.append(user)
 
     matrix_of_associated_values = np.array(matrix_of_associated_values)
 
-    column_sums = np.sum(matrix_of_associated_values, axis=0)
-
-    new_columns = np.where(column_sums > np.sum(column_sums)*.001)[0]
-
-    print(len(new_columns))
-
-    matrix_without_low_values = matrix_of_associated_values[:, new_columns]
+    #matrix_of_associated_values = np.reshape(matrix_of_associated_values, (7, 52))
 
     return matrix_of_associated_values
 
 
 def associate_terms_with_user(unique_term_set, all_users_terms_dict):
 
-    associated_value_return_dict = {}
+    associated_value_return_list = []
 
-    # consider the first user
+    count = 0
+
     for user_id in all_users_terms_dict:
 
-        # what terms *could* this user have possibly used
-        this_user_zero_vector = []
-
-
-        # this could be refactored somehow
-        for term in  unique_term_set:
-            # this_user_zero_vector.extend(0)
-
-            this_user_zero_vector.insert( len(this_user_zero_vector) ,0)
-            #to create array of zeros:
-            #np.zeros(this_user_zero_vector)
-
+        #to create array of zeros:
+        this_user_zero_vector = list(np.zeros(len(unique_term_set)))
+        
         # what terms *did* this user use
         terms_belong_to_this_user = all_users_terms_dict.get(user_id)
+                    
+        for global_index, unique_term in enumerate(unique_term_set):
+            this_user_zero_vector[global_index] = terms_belong_to_this_user.count(unique_term)
+            
+        associated_value_return_list.append(this_user_zero_vector)
 
-        # let's start counting all the possible terms that this term in the personal
-        # user list of words could correspond to... 
-        global_term_element_index = 0
+        count +=1
+        
+        if count%10000==0:
+            
+            print(count)
 
-        # while this one term is in the range of all possible terms
-        while global_term_element_index < len(unique_term_set):
-
-            # start counting the number of terms he used
-            local_term_set_item_index = 0
-
-            # if this one term he used is still in the range of terms he used, counting them one by one
-            while local_term_set_item_index < len(terms_belong_to_this_user):
-
-                # if this one user term is the same as this one global term
-                if list(unique_term_set)[global_term_element_index] == terms_belong_to_this_user[local_term_set_item_index]:
-
-                    # increment the number of times this user used this term
-                    this_user_zero_vector[global_term_element_index] += 1
-
-                # go to the next term for this user
-                local_term_set_item_index += 1
-
-            # go to the next term in the global list of all possible terms
-            global_term_element_index += 1
-
-        associated_value_return_dict.update({user_id: this_user_zero_vector})
-
-    return associated_value_return_dict
+    return associated_value_return_list
 
 
 def generate_complete_terms_list_and_users_list(all_users_terms_dict):
@@ -129,10 +106,19 @@ def generate_complete_terms_list_and_users_list(all_users_terms_dict):
 
     return([complete_terms_list, complete_users_list])
 
+def unique_term_list(unique_term_set):
+    unique_terms_list = []
+
+    for term in unique_term_set:
+        unique_terms_list.append(term)
+        
+    #print(len(unique_terms_list))
+    return(unique_terms_list)
 
 def create_set(complete_terms_list):
 
     term_set = set(complete_terms_list)
+    #print(len(term_set))
 
     return term_set
 
@@ -140,7 +126,7 @@ def create_set(complete_terms_list):
 def main():
 
     # define input data file
-    input_data_file = './data/hash_mention.json'
+    input_data_file = './data/toy_data.json'
     
     # generate data structure
     create_initial_data_structure(input_data_file)

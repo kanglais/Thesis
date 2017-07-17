@@ -137,72 +137,72 @@ for word, count in freqs.most_common(500):
             most_common_urls[url].append(bias)
 
 
-# import matplotlib.pylab as plt
+import matplotlib.pylab as plt
 
 
-# for item in most_common_urls.items():
-#     label = item[0]
-#     data = item[1]
-#     for i in data: 
-#         x = data[0]
-#         y = data[1]
-#         plt.scatter(x, y, color='blue', marker='*')
+for item in most_common_urls.items():
+    label = item[0]
+    data = item[1]
+    for i in data: 
+        x = data[0]
+        y = data[1]
+        plt.scatter(x, y, color='blue', marker='*')
         
-# plt.xlabel('Frequency of Tweets')
-# plt.ylabel('Bias: Conservative to Liberal')
+plt.xlabel('Frequency of Tweets')
+plt.ylabel('Bias: Conservative to Liberal')
 
+plt.savefig('./data/common_urls.png')
+#plt.show()
 
-# plt.show()
-
-# for item in most_common_urls.items():
-#     label = item[0]
-#     data = item[1]
-#     for i in data:
-#         if data[1]>0: 
-#             x = data[0]
-#             y = data[1]
-#             plt.scatter(x, y, color='blue', marker='*')
-#         plt.annotate(label, xy = (x, y))
+for item in most_common_urls.items():
+    label = item[0]
+    data = item[1]
+    for i in data:
+        if data[1]>0: 
+            x = data[0]
+            y = data[1]
+            plt.scatter(x, y, color='blue', marker='*')
+        plt.annotate(label, xy = (x, y))
         
-# plt.xlabel('Frequency of Tweets')
-# plt.ylabel('Bias: Conservative')
-# plt.title('Conservative Tweets')
+plt.xlabel('Frequency of Tweets')
+plt.ylabel('Bias: Conservative')
+plt.title('Conservative Tweets')
 
+plt.savefig('./data/conservative_urls.png')
+#plt.show()
 
-# plt.show()
-
-# for item in most_common_urls.items():
-#     label = item[0]
-#     data = item[1]
-#     for i in data:
-#         if data[1]<0: 
-#             x = data[0]
-#             y = data[1]
-#             plt.scatter(x, y, color='blue', marker='*')
-#     plt.annotate(label, xy = (x, y))
+for item in most_common_urls.items():
+    label = item[0]
+    data = item[1]
+    for i in data:
+        if data[1]<0: 
+            x = data[0]
+            y = data[1]
+            plt.scatter(x, y, color='blue', marker='*')
+    plt.annotate(label, xy = (x, y))
         
-# plt.xlabel('Frequency of Tweets')
-# plt.ylabel('Bias: Liberal')
-# plt.title('Liberal Tweets')
+plt.xlabel('Frequency of Tweets')
+plt.ylabel('Bias: Liberal')
+plt.title('Liberal Tweets')
 
+plt.savefig('./data/liberal_urls.png')
+#plt.show()
 
-# plt.show()
-
-# for item in most_common_urls.items():
-#     label = item[0]
-#     data = item[1]
-#     for i in data:
-#         #excludes twitter bc there are too many links // messes w graph
-#         if data[1]==0 and data[0]<40000: 
-#             x = data[1]
-#             y = data[0]
-#             plt.scatter(x, y, color='blue', marker='*')
-#     plt.annotate(label, xy = (x, y))
+for item in most_common_urls.items():
+    label = item[0]
+    data = item[1]
+    for i in data:
+        #excludes twitter bc there are too many links // messes w graph
+        if data[1]==0 and data[0]<40000: 
+            x = data[1]
+            y = data[0]
+            plt.scatter(x, y, color='blue', marker='*')
+    plt.annotate(label, xy = (x, y))
         
-# plt.xlabel('Frequency of Tweets')
-# plt.ylabel('Bias = 0')
-# plt.title('UnBiased Tweets')
+plt.xlabel('Frequency of Tweets')
+plt.ylabel('Bias = 0')
+plt.title('UnBiased Tweets')
 
-
-# plt.show()
+plt.savefig('./data/unbiased_urls.png')
+#plt.show()
 

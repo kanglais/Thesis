@@ -1,44 +1,95 @@
 import create_hashtag_mention_matrix
-from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn import decomposition
 from sklearn.cluster import KMeans
 import numpy as np
-import pylab as pl
+import pylab as plt
+import json
+from sklearn.manifold import TSNE
+from collections import Counter
 
+# define input data file
+input_data_file = './data/toy_data.json'
 
-def cluster_with_kmeans(x):
+# access hashtag_clustering file, data from file to use in this script
+normalized_matrix = create_hashtag_mention_matrix.create_initial_data_structure(input_data_file)
 
-    kmeans = KMeans(n_clusters=2, random_state=0)
-    kmeans.fit(X)
+with open(input_data_file, 'rb') as raw_tweet_data:
 
-    pl.scatter(X[:, 0], X[:, 1], c=kmeans.labels_)
-    pl.show()
+    # generate python dict from raw json data
+    all_users_terms_dict = json.load(raw_tweet_data)
+#print(len(all_users_terms_dict))
 
-def create_matrix_with_pca(normalized_matrix):
+complete_terms_list = []
+complete_users_list = []
 
-    X_std = create_standardized_matrix(normalized_matrix)
+for key, value in all_users_terms_dict.items():
+    complete_terms_list.extend(value)
+    if key not in complete_users_list:
+        complete_users_list.append(key)
+#print(len(complete_users_list))
+
+term_set = set(complete_terms_list)
+#print(len(term_set))
+
+unique_terms = []
+
+for term in term_set:
+    unique_terms.append(term)
     
-    pca = decomposition.PCA(n_components=10)
-    pca.fit(X_std.data)
-    PCA(copy=True, n_components=10, whiten=False)
-    X = pca.transform(X_std.data)
-    
-    return X
+print(len(unique_terms))
 
-def create_standardized_matrix(normalized_matrix):
+pca = PCA(n_components=20)
+pca_result = pca.fit_transform(normalized_matrix.data)
 
-	X_std = StandardScaler().fit_transform(normalized_matrix)
+print('Explained variation per principal component: {}'.format(pca.explained_variance_ratio_))
+print(sum(pca.explained_variance_ratio_))
 
-	return X_std
+kmeans = KMeans(n_clusters=3)
+kmeans.fit(pca_result)
 
-def main():
+tsne = TSNE(n_components=3, verbose=1, perplexity=40, n_iter=300)
+tsne_results = tsne.fit_transform(pca_result).T 
 
-    # define input data file
-	input_data_file = './data/hash_mention.json'
-    
-    # access hashtag_clustering file, data from file to use in this script
-	create_matrix_with_pca_and_kmeans( create_hashtag_mention_matrix.create_initial_data_structure(input_data_file) )
 
-if __name__ == "__main__":
-    main()
+print(tsne_results.shape)
+print((kmeans.labels_).shape)
+
+Counter(kmeans.labels_)
+
+#figure size for jupyter notebook
+pl.figure(figsize=(1, (18, 16)))
+
+plt.scatter(tsne_results[0], tsne_results[1], c=kmeans.labels_, cmap=plt.cm.rainbow)
+#plt.show()
+plt.savefig('./data/kmeans_toy.png')
+
+cluster_1 = normalized_matrix[np.where(kmeans.labels_ == 1)]
+x_1 = np.sum(cluster_1, axis=0)
+
+print(cluster_1.shape)
+print(x_1.shape)
+
+cluster_2 = normalized_matrix[np.where(kmeans.labels_ == 2)]
+x_2 = np.sum(cluster_2, axis=0)
+
+print(cluster_2.shape)
+print(x_2.shape)
+
+cluster_3 = normalized_matrix[np.where(kmeans.labels_ == 3)]
+
+x_3 = np.sum(cluster_3, axis=0)
+
+print(cluster_3.shape)
+print(x_3.shape)
+
+
+def top_hashtags_per_cluster(cluster, unique_terms):
+
+    top_tags = cluster.argsort()[-20:][::-1]
+
+    for i in top_tags:
+        print(unique_terms[i])
+
+print(top_hashtags_per_cluster(x_1, unique_terms))
+print(top_hashtags_per_cluster(x_2, unique_terms))
+print(top_hashtags_per_cluster(x_3, unique_terms))
