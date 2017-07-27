@@ -1,11 +1,11 @@
 
-from pymongo import MongoClient
+# from pymongo import MongoClient
 import os
 import json
 
-client = MongoClient()
-db = client.tweets
-collection = db.tweets_with_urls
+# client = MongoClient()
+# db = client.tweets
+# collection = db.tweets_with_urls
 
 #^^created new collection w/in database
 

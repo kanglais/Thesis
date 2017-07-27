@@ -6,7 +6,7 @@ from sklearn import cluster
 import numpy as np
 from matplotlib import pyplot
 import os
-import pickle
+import pandas as pd
 
 #split into smaller ones and dump into pickles
 
@@ -41,7 +41,17 @@ def create_initial_data_structure(input_data_file):
         #normalize matrix
         normalized_matrix = normalize_associated_term_values(matrix_of_associated_values)
 
+        to_file = write_to_file(normalized_matrix)
+
     return normalized_matrix
+
+def write_to_file(normalized_matrix):
+
+    with open('/var/scratch/kenglish/hash_mention_matrix.json', 'w') as f:
+        for line in normalized_matrix:
+            jsonify_matrix = pd.Series(line).to_json(orient='values')
+
+            json.dump(jsonify_matrix, f)
 
 def normalize_associated_term_values(matrix_of_associated_values):
 
@@ -87,8 +97,8 @@ def associate_terms_with_user(unique_term_set, all_users_terms_dict):
         count +=1
         
         if count%10000==0:
-            
-            print(count)
+            break
+            #print(count)
 
     return associated_value_return_list
 
@@ -126,7 +136,7 @@ def create_set(complete_terms_list):
 def main():
 
     # define input data file
-    input_data_file = './data/toy_data.json'
+    input_data_file = '/var/scratch/kenglish/hash_mention.json'
     
     # generate data structure
     create_initial_data_structure(input_data_file)

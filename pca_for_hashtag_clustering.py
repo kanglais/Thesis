@@ -8,7 +8,7 @@ from sklearn.manifold import TSNE
 from collections import Counter
 
 # define input data file
-input_data_file = './data/toy_data.json'
+input_data_file = '/var/scratch/kenglish/hash_mention.json'
 
 # access hashtag_clustering file, data from file to use in this script
 normalized_matrix = create_hashtag_mention_matrix.create_initial_data_structure(input_data_file)
@@ -57,11 +57,11 @@ print((kmeans.labels_).shape)
 Counter(kmeans.labels_)
 
 #figure size for jupyter notebook
-pl.figure(figsize=(1, (18, 16)))
+plt.figure(figsize=(18, 16))
 
 plt.scatter(tsne_results[0], tsne_results[1], c=kmeans.labels_, cmap=plt.cm.rainbow)
 #plt.show()
-plt.savefig('./data/kmeans_toy.png')
+plt.savefig('./viz/kmeans.png')
 
 cluster_1 = normalized_matrix[np.where(kmeans.labels_ == 1)]
 x_1 = np.sum(cluster_1, axis=0)
@@ -85,10 +85,16 @@ print(x_3.shape)
 
 def top_hashtags_per_cluster(cluster, unique_terms):
 
-    top_tags = cluster.argsort()[-20:][::-1]
+	top_hash_words = []
 
-    for i in top_tags:
-        print(unique_terms[i])
+	top_tags = cluster.argsort()[-20:][::-1]
+
+	for i in top_tags:
+		top_hash_words.append(unique_terms[i])
+	print(top_hash_words)
+
+	word_frequency = Counter(top_hash_words)
+	print(word_frequency)
 
 print(top_hashtags_per_cluster(x_1, unique_terms))
 print(top_hashtags_per_cluster(x_2, unique_terms))
