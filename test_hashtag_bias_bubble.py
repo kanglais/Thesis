@@ -1,197 +1,163 @@
 import test_user_bias_bubble
-
-
-#get most frequently used hashtags in whole set
-
+import numpy as np 
+import json
+from collections import defaultdict
+from urllib.parse import urlparse
 from collections import Counter
+import pprint
+import pandas as pd
 
-one_list_hashtags = []
+#bias, according to pew research center
+bias = np.array([0.6, 0.6, 0.6, 0.6, 0.6, 0.5, 0.2, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.2, -0.2, -0.3,
+        -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.6, -0.6])
 
-for tag in all_hashtags: 
-    for text in tag: 
-        one_list_hashtags.append(text)
-
-frequencies_hash = Counter(one_list_hashtags)
-
-print(frequencies_hash.most_common(100))
-
-
-#manually choose liberal and conservative hashtags, fill lists
-
-conservative_list = ['Trump', 'DonaldTrump', 'trump', 'NeverHillary', 'MAGA', 'TrumpPence16', 'CrookedHillary', 'MakeAmericaGreatAgain', 'BasketOfDeplorables', 'HillarysHealth']
-
-liberal_list = ['ImWithHer', 'HillaryClinton', 'NeverTrump', 'Hillary', 'imwithher', 'nevertrump', 'DumpTrump', 'Clinton', 'dumptrump', 'hillary']
-
-#split users into liberal, conservative, neutral groups based on above lists
-
-users_conservative_hash_bias = []
-users_liberal_hash_bias = []
-users_neutral_hash_bias = []
-
-for user in user_hash_dict: 
-    for text in user_hash_dict[user]:
-        if text in conservative_list:
-            users_conservative_hash_bias.append(user)
-        elif text in liberal_list:
-            users_liberal_hash_bias.append(user)
-        else:
-            users_neutral_hash_bias.append(user)
-
-print(len(users_conservative_hash_bias))
-print(len(users_liberal_hash_bias))
-print(len(users_neutral_hash_bias))
+#news sources as defined by pew research center
+news_sources = np.array(['breitbart', 'limbaugh', 'theblaze', 'hannity', 'glenbeck', 'drudgereport', 'fox',
+                'wallstreetjournal', 'yahoo', 'usatoday', 'abc', 'bloomberg', 'google', 'cbs', 'nbc',
+                'cnn', 'msnbc', 'buzzfeed', 'pbs', 'bbc', 'huffingtonpost', 'washingtonpost', 'economist', 'politico',
+                'dailyshow', 'guardian', 'aljazeera', 'npr', 'colbertreport', 'nytimes', 'slate', 'newyorker'])
 
 
-conservative_users_and_sn = []
+#determine which hashtags are more common with which biases
+def define_hashtag_bias(user_hash_dict, user_list_biased):
+    bias_tags = []
+    all_tags = []
 
-for i, u in ids_and_sn: 
-    if i in users_conservative_hash_bias:
-        conservative_users_and_sn.append([i, u])
+    for user in user_hash_dict:
+        all_tags.append(user_hash_dict[user])
+
+        if user in user_list_biased:
+            bias_tags.append(user_hash_dict[user])
+    return bias_tags
+
+liberal_tags = define_hashtag_bias(user_hash_dict, liberal_users)
+conservative_tags = define_hashtag_bias(user_hash_dict, conservative_users)
+neutral_tags = define_hashtag_bias(user_hash_dict, neutral_users)
+non_url_tags = define_hashtag_bias(user_hash_dict, non_url_users)
+
+#create list of unique hashtags
+def unique_tags(tag_list):
+    unique = []
+
+    for tag in tag_list:
+        for item in tag:
+            unique.append(item)
+
+    unique = set(unique)
+    return unique
+
+liberal_unique = unique_tags(liberal_tags)
+conservative_unique = unique_tags(conservative_tags)
+neutral_unique = unique_tags(neutral_unique)
+
+#associate screen names and user id's with bias
+ids_and_sn =[[str(u),sn] for u,sn in zip(user_id_list,user_sn_list)]
 
 
-#check predominant retweets in these groups 
-cons_potential = []
+#define users according to their potential bias based on tweeted sources
+def potential_bias(ids_and_sn, user_list):
+    screen_names = []
 
-for i, sn in conservative_users_and_sn: 
+    for i, u in ids_and_sn:
+        if i in user_list:
+            screen_names.append(u)
+    return screen_names
+
+conservative_screen_names = potential_bias(ids_and_sn, conservative_users)
+liberal_screen_names = potential_bias(ids_and_sn, liberal_users)
+neutral_screen_names = potential_bias(ids_and_sn, neutral_users)
+non_url_user_screen_names = potential_bias(ids_and_sn, non_url_users)
+
+
+#see which non-url using users retweeted which biased users
+#define potential bias of non_url users
+def potential_bias_based_on_retweets(reply_to_sn_dict, non_url_users, screen_name_list):
+    retweet_bias = []
+
     for user in reply_to_sn_dict:
-        if sn in reply_to_sn_dict[user]:
-            cons_potential.append(user)
+        if user in non_url_users:
+            rt = reply_to_sn_dict[user]
+            for text in rt:
+                if text in screen_name_list:
+                    retweet_bias.append(user)
 
-cons_check = []
+maybe_conservative_retweet_bias = potential_bias_based_on_retweets(reply_to_sn_dict, non_url_users, conservative_screen_names)
+maybe_liberal_retweet_bias = potential_bias_based_on_retweets(reply_to_sn_dict, non_url_users, liberal_screen_names)
+maybe_neutral_retweet_bias = potential_bias_based_on_retweets(reply_to_sn_dict, non_url_users, neutral_screen_names)
 
-for user in cons_potential:
-    if user in conservative_users_and_sn:
-        cons_check.append(user)
-print(len(cons_check))
+#see what hashtags non_url users are using
+def non_url_user_hash(user_hash_dict, non_url_users, unique_hash_list):
+    hash_users = []
 
+    for user in user_hash_dict:
+        if user in non_url_users:
+            for text in user_hash_dict[user]:
+                if text in unique_hash_list:
+                    hash_users.append(user)
+    return hash_users
 
-liberal_users_and_sn = []
+liberal_hash_users = non_url_user_hash(user_hash_dict, non_url_users, liberal_unique)
+conservative_hash_users = non_url_user_hash(user_hash_dict, non_url_users, conservative_unique)
+neutral_hash_users = non_url_user_hash(user_hash_dict, non_url_users, neutral_unique)
+unknown_hash = []
+uncertain_users = []
 
-for i, u in ids_and_sn: 
-    if i in users_liberal_hash_bias:
-        liberal_users_and_sn.append([i, u])
+#match hashtag bias with sources bias and try to confirm source bias- are they the same?
+liberal_positive_results = []
+conservative_positive_results = []
+neutral_positive_results = []
 
+liberal_negative_results = []
+conservative_negative_results = []
+neutral_negative_results = []
 
-
-#check predominant retweets in these groups 
-lib_potential = []
-
-for i, sn in liberal_users_and_sn: 
-    for user in reply_to_sn_dict:
-        if sn in reply_to_sn_dict[user]:
-            lib_potential.append(user)
-
-lib_check = []
-
-for user in lib_potential:
-    if user in liberal_users_and_sn:
-        lib_potential.append(user)
-print(len(lib_potential))
-
-neutral_users_and_sn = []
-
-for i, u in ids_and_sn: 
-    if i in users_neutral_hash_bias:
-        neutral_users_and_sn.append([i, u])
-
-#check predominant retweets in these groups 
-
-neu_potential = []
-
-for i, sn in neutral_users_and_sn: 
-    for user in reply_to_sn_dict:
-        if sn in reply_to_sn_dict[user]:
-            neu_potential.append(user)
-
-neu_check = []
-
-for user in neu_potential:
-    if user in neutral_users_and_sn:
-        neu_potential.append(user)
-print(len(neu_potential))
+for user in liberal_hash_users:
+    if user in maybe_liberal_retweet_bias:
+        liberal_positive_results.append(user)
+    else:
+        liberal_negative_results.append(user)
 
 
-#check predominant news sources in these groups
+for user in conservative_hash_users:
+    if user in maybe_conservative_retweet_bias:
+        conservative_positive_results.append(user)
+    else:
+        conservative_negative_results.append(user)
 
-cons_sources = []
+for user in neutral_hash_users:
+    if user in maybe_neutral_retweet_bias:
+        neutral_positive_results.append(user)
+    else:
+        neutral_negative_results.append(user)
 
-for i, sn in conservative_users_and_sn:
-    if i in expanded_url_dict_with_user:
-        for text in expanded_url_dict_with_user[i]:
-            o = urlparse(text)
-            root_url = o.hostname
-            root_url_split = root_url.split(".")
+# def check_results(user_with_bias, user_maybe):
+# 	positive_results = []
+# 	negative_results = []
 
-            if root_url_split[0] == "www":
-                cons_sources.append(root_url_split[1])
-            else:
-                cons_sources.append(root_url_split[0])
+# 	for user in user_with_bias:
+# 		if user in user_maybe:
+# 			positive_results.append(user)
+# 		else:
+# 			negative_results.append(user)
+# 	#check code can probs do this in one line 
 
-print(len(cons_sources))
-print(Counter(cons_sources))
+print(len(liberal_positive_results))
+print(len(conservative_positive_results))
+print(len(neutral_positive_results))
 
-lib_sources = []
+print(len(liberal_negative_results))
+print(len(conservative_negative_results))
+print(len(neutral_negative_results))
 
-for i, sn in liberal_users_and_sn:
-    if i in expanded_url_dict_with_user:
-        for text in expanded_url_dict_with_user[i]:
-            o = urlparse(text)
-            root_url = o.hostname
-            root_url_split = root_url.split(".")
+print(len(uncertain_users))
 
-            if root_url_split[0] == "www":
-                lib_sources.append(root_url_split[1])
-            else:
-                lib_sources.append(root_url_split[0])
+def main():
 
-print(len(lib_sources))
+    # define input data file
+    input_data_file = '/Users/Kellie/Desktop/sep_tweets.json'
+    
+    # import user bias from test_user_bias_bubble
+    test_user_bias_bubble.create_and_test_user_bias_matrix(input_data_file)
 
-print(Counter(lib_sources))
-
-neu_sources = []
-
-for i, sn in neutral_users_and_sn:
-    if i in expanded_url_dict_with_user:
-        for text in expanded_url_dict_with_user[i]:
-            o = urlparse(text)
-            root_url = o.hostname
-            root_url_split = root_url.split(".")
-
-            if root_url_split[0] == "www":
-                neu_sources.append(root_url_split[1])
-            else:
-                neu_sources.append(root_url_split[0])
-
-print(len(neu_sources))
-
-print(Counter(neu_sources))
-
-#check predominant hashtags in these groups 
-
-top_neu_hash = []
-
-for i, sn in neutral_users_and_sn:
-    if i in user_hash_dict:
-        top_neu_hash.extend(user_hash_dict[i])
-print(len(top_neu_hash))
-
-print(Counter(top_neu_hash))
-
-top_cons_hash = []
-
-for i, sn in conservative_users_and_sn:
-    if i in user_hash_dict:
-        top_cons_hash.extend(user_hash_dict[i])
-print(len(top_cons_hash))
-
-print(Counter(top_cons_hash))
-
-top_lib_hash = []
-
-for i, sn in liberal_users_and_sn:
-    if i in user_hash_dict:
-        top_lib_hash.extend(user_hash_dict[i])
-print(len(top_lib_hash))
-
-print(Counter(top_lib_hash))
-
+if __name__ == "__main__":
+    main()

@@ -8,7 +8,7 @@ from sklearn.manifold import TSNE
 from collections import Counter
 
 # define input data file
-input_data_file = '/var/scratch/kenglish/hash_mention.json'
+input_data_file = '/var/scratch/kenglish/january_hash_mention.json'
 
 # access hashtag_clustering file, data from file to use in this script
 normalized_matrix = create_hashtag_mention_matrix.create_initial_data_structure(input_data_file)
@@ -39,7 +39,7 @@ for term in term_set:
 print(len(unique_terms))
 
 pca = PCA(n_components=20)
-pca_result = pca.fit_transform(normalized_matrix.data)
+pca_result = pca.fit_transform(normalized_matrix)
 
 print('Explained variation per principal component: {}'.format(pca.explained_variance_ratio_))
 print(sum(pca.explained_variance_ratio_))

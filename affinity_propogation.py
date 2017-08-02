@@ -6,7 +6,7 @@ from sklearn.datasets.samples_generator import make_blobs
 
 
 # define input data file
-input_data_file = './data/toy_data.json'
+input_data_file = '/var/scratch/kenglish/toy_data.json'
 
 # access hashtag_clustering file, data from file to use in this script
 normalized_matrix = create_hashtag_mention_matrix.create_initial_data_structure(input_data_file)
@@ -49,5 +49,5 @@ for k, col in zip(range(n_clusters_), colors):
         plt.plot([cluster_center[0], x[0]], [cluster_center[1], x[1]], col)
 
 plt.title('Estimated number of clusters: %d' % n_clusters_)
-#plt.show()
-plt.savefig('./data/affinity_toy.png')
+plt.show()
+plt.savefig('./viz/jan_sample_affinity.png')

@@ -136,7 +136,7 @@ def create_set(complete_terms_list):
 def main():
 
     # define input data file
-    input_data_file = '/var/scratch/kenglish/hash_mention.json'
+    input_data_file = '/var/scratch/kenglish/january_hash_mention.json'
     
     # generate data structure
     create_initial_data_structure(input_data_file)
