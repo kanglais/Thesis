@@ -1,22 +1,8 @@
-import test_user_bias_bubble
 import numpy as np 
 import json
 from collections import defaultdict
 from urllib.parse import urlparse
 from collections import Counter
-import pprint
-import pandas as pd
-
-#bias, according to pew research center
-bias = np.array([0.6, 0.6, 0.6, 0.6, 0.6, 0.5, 0.2, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.2, -0.2, -0.3,
-        -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.6, -0.6])
-
-#news sources as defined by pew research center
-news_sources = np.array(['breitbart', 'limbaugh', 'theblaze', 'hannity', 'glenbeck', 'drudgereport', 'fox',
-                'wallstreetjournal', 'yahoo', 'usatoday', 'abc', 'bloomberg', 'google', 'cbs', 'nbc',
-                'cnn', 'msnbc', 'buzzfeed', 'pbs', 'bbc', 'huffingtonpost', 'washingtonpost', 'economist', 'politico',
-                'dailyshow', 'guardian', 'aljazeera', 'npr', 'colbertreport', 'nytimes', 'slate', 'newyorker'])
-
 
 #determine which hashtags are more common with which biases
 def define_hashtag_bias(user_hash_dict, user_list_biased):
@@ -30,11 +16,6 @@ def define_hashtag_bias(user_hash_dict, user_list_biased):
             bias_tags.append(user_hash_dict[user])
     return bias_tags
 
-liberal_tags = define_hashtag_bias(user_hash_dict, liberal_users)
-conservative_tags = define_hashtag_bias(user_hash_dict, conservative_users)
-neutral_tags = define_hashtag_bias(user_hash_dict, neutral_users)
-non_url_tags = define_hashtag_bias(user_hash_dict, non_url_users)
-
 #create list of unique hashtags
 def unique_tags(tag_list):
     unique = []
@@ -46,14 +27,6 @@ def unique_tags(tag_list):
     unique = set(unique)
     return unique
 
-liberal_unique = unique_tags(liberal_tags)
-conservative_unique = unique_tags(conservative_tags)
-neutral_unique = unique_tags(neutral_unique)
-
-#associate screen names and user id's with bias
-ids_and_sn =[[str(u),sn] for u,sn in zip(user_id_list,user_sn_list)]
-
-
 #define users according to their potential bias based on tweeted sources
 def potential_bias(ids_and_sn, user_list):
     screen_names = []
@@ -62,12 +35,6 @@ def potential_bias(ids_and_sn, user_list):
         if i in user_list:
             screen_names.append(u)
     return screen_names
-
-conservative_screen_names = potential_bias(ids_and_sn, conservative_users)
-liberal_screen_names = potential_bias(ids_and_sn, liberal_users)
-neutral_screen_names = potential_bias(ids_and_sn, neutral_users)
-non_url_user_screen_names = potential_bias(ids_and_sn, non_url_users)
-
 
 #see which non-url using users retweeted which biased users
 #define potential bias of non_url users
@@ -80,10 +47,6 @@ def potential_bias_based_on_retweets(reply_to_sn_dict, non_url_users, screen_nam
             for text in rt:
                 if text in screen_name_list:
                     retweet_bias.append(user)
-
-maybe_conservative_retweet_bias = potential_bias_based_on_retweets(reply_to_sn_dict, non_url_users, conservative_screen_names)
-maybe_liberal_retweet_bias = potential_bias_based_on_retweets(reply_to_sn_dict, non_url_users, liberal_screen_names)
-maybe_neutral_retweet_bias = potential_bias_based_on_retweets(reply_to_sn_dict, non_url_users, neutral_screen_names)
 
 #see what hashtags non_url users are using
 def non_url_user_hash(user_hash_dict, non_url_users, unique_hash_list):

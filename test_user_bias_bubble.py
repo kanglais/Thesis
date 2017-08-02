@@ -75,12 +75,17 @@ def create_and_test_user_bias_matrix(input_data_file):
 				expanded_url_dict_with_user.update({user_id_list[i] : [url['expanded_url']]})
 		i+=1
 
+	reply_to_sn_dict = create_retweet_user_dict(user_id_list, all_users_full_tweets_dict)
+
+	user_hash_dict = create_hashtag_user_dict(user_id_list, all_users_full_tweets_dict)
+
 	#create matrix using url dict
 	bias_matrix = create_bias_matrix(expanded_url_dict_with_user, news_sources)
 
 	# cooc_diag = diagonal_cooc_matrix(cooc_matrix)
 	bias_number_user = pew_bias_matrix(bias_matrix)
 	users_and_biases = user_ids_user_bias(url_users, bias_number_user)
+
 
 	#determine bias based on positive or negative results
 	liberal_users = []
@@ -105,10 +110,76 @@ def create_and_test_user_bias_matrix(input_data_file):
 	neutral_tags = test_hashtag_bias_bubble.define_hashtag_bias(user_hash_dict, neutral_users)
 	non_url_tags = test_hashtag_bias_bubble.define_hashtag_bias(user_hash_dict, non_url_users)
 
-	print(len(liberal_tags))
+	liberal_unique = test_hashtag_bias_bubble.unique_tags(liberal_tags)
+	conservative_unique = test_hashtag_bias_bubble.unique_tags(conservative_tags)
+	neutral_unique = test_hashtag_bias_bubble.unique_tags(neutral_unique)
+
+	#associate screen names and user id's with bias
+	ids_and_sn =[[str(u),sn] for u,sn in zip(user_id_list,user_sn_list)]
+
+	conservative_screen_names = test_hashtag_bias_bubble.potential_bias(ids_and_sn, conservative_users)
+	liberal_screen_names = test_hashtag_bias_bubble.potential_bias(ids_and_sn, liberal_users)
+	neutral_screen_names = test_hashtag_bias_bubble.potential_bias(ids_and_sn, neutral_users)
+	non_url_user_screen_names = test_hashtag_bias_bubble.potential_bias(ids_and_sn, non_url_users)
+
+	maybe_conservative_retweet_bias = test_hashtag_bias_bubble.potential_bias_based_on_retweets(reply_to_sn_dict, non_url_users, conservative_screen_names)
+	maybe_liberal_retweet_bias = test_hashtag_bias_bubble.potential_bias_based_on_retweets(reply_to_sn_dict, non_url_users, liberal_screen_names)
+	maybe_neutral_retweet_bias = test_hashtag_bias_bubble.potential_bias_based_on_retweets(reply_to_sn_dict, non_url_users, neutral_screen_names)
+
+	liberal_hash_users = test_hashtag_bias_bubble.non_url_user_hash(user_hash_dict, non_url_users, liberal_unique)
+	conservative_hash_users = test_hashtag_bias_bubble.non_url_user_hash(user_hash_dict, non_url_users, conservative_unique)
+	neutral_hash_users = test_hashtag_bias_bubble.non_url_user_hash(user_hash_dict, non_url_users, neutral_unique)
+
+	#match hashtag bias with sources bias and try to confirm source bias- are they the same?
+	liberal_positive_results = []
+	conservative_positive_results = []
+	neutral_positive_results = []
+
+	liberal_negative_results = []
+	conservative_negative_results = []
+	neutral_negative_results = []
+
+	for user in liberal_hash_users:
+	    if user in maybe_liberal_retweet_bias:
+	        liberal_positive_results.append(user)
+	    else:
+	        liberal_negative_results.append(user)
 
 
-def create_retweet_user_dict(user_id_list, reply_to_sn_dict, all_users_full_tweets_dict):
+	for user in conservative_hash_users:
+	    if user in maybe_conservative_retweet_bias:
+	        conservative_positive_results.append(user)
+	    else:
+	        conservative_negative_results.append(user)
+
+	for user in neutral_hash_users:
+	    if user in maybe_neutral_retweet_bias:
+	        neutral_positive_results.append(user)
+	    else:
+	        neutral_negative_results.append(user)
+
+	# def check_results(user_with_bias, user_maybe):
+	# 	positive_results = []
+	# 	negative_results = []
+
+	# 	for user in user_with_bias:
+	# 		if user in user_maybe:
+	# 			positive_results.append(user)
+	# 		else:
+	# 			negative_results.append(user)
+	# 	#check code can probs do this in one line 
+
+	print(len(liberal_positive_results))
+	print(len(conservative_positive_results))
+	print(len(neutral_positive_results))
+
+	print(len(liberal_negative_results))
+	print(len(conservative_negative_results))
+	print(len(neutral_negative_results))
+
+	print(len(uncertain_users))
+
+def create_retweet_user_dict(user_id_list, all_users_full_tweets_dict):
 	#create a dict with reply_to screen names and user id's 
 	#users that tweeted at other users
 
