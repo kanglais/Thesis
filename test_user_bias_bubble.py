@@ -112,7 +112,7 @@ def create_and_test_user_bias_matrix(input_data_file):
 
 	liberal_unique = test_hashtag_bias_bubble.unique_tags(liberal_tags)
 	conservative_unique = test_hashtag_bias_bubble.unique_tags(conservative_tags)
-	neutral_unique = test_hashtag_bias_bubble.unique_tags(neutral_unique)
+	neutral_unique = test_hashtag_bias_bubble.unique_tags(neutral_tags)
 
 	#associate screen names and user id's with bias
 	ids_and_sn =[[str(u),sn] for u,sn in zip(user_id_list,user_sn_list)]
@@ -131,53 +131,9 @@ def create_and_test_user_bias_matrix(input_data_file):
 	neutral_hash_users = test_hashtag_bias_bubble.non_url_user_hash(user_hash_dict, non_url_users, neutral_unique)
 
 	#match hashtag bias with sources bias and try to confirm source bias- are they the same?
-	liberal_positive_results = []
-	conservative_positive_results = []
-	neutral_positive_results = []
-
-	liberal_negative_results = []
-	conservative_negative_results = []
-	neutral_negative_results = []
-
-	for user in liberal_hash_users:
-	    if user in maybe_liberal_retweet_bias:
-	        liberal_positive_results.append(user)
-	    else:
-	        liberal_negative_results.append(user)
-
-
-	for user in conservative_hash_users:
-	    if user in maybe_conservative_retweet_bias:
-	        conservative_positive_results.append(user)
-	    else:
-	        conservative_negative_results.append(user)
-
-	for user in neutral_hash_users:
-	    if user in maybe_neutral_retweet_bias:
-	        neutral_positive_results.append(user)
-	    else:
-	        neutral_negative_results.append(user)
-
-	# def check_results(user_with_bias, user_maybe):
-	# 	positive_results = []
-	# 	negative_results = []
-
-	# 	for user in user_with_bias:
-	# 		if user in user_maybe:
-	# 			positive_results.append(user)
-	# 		else:
-	# 			negative_results.append(user)
-	# 	#check code can probs do this in one line 
-
-	print(len(liberal_positive_results))
-	print(len(conservative_positive_results))
-	print(len(neutral_positive_results))
-
-	print(len(liberal_negative_results))
-	print(len(conservative_negative_results))
-	print(len(neutral_negative_results))
-
-	print(len(uncertain_users))
+	liberal_results = test_hashtag_bias_bubble.positive_and_negative_results(liberal_hash_users, maybe_liberal_retweet_bias)
+	conservative_results = test_hashtag_bias_bubble.positive_and_negative_results(conservative_hash_users, maybe_conservative_retweet_bias)
+	neutral_results = test_hashtag_bias_bubble.positive_and_negative_results(neutral_hash_users, maybe_neutral_retweet_bias)
 
 def create_retweet_user_dict(user_id_list, all_users_full_tweets_dict):
 	#create a dict with reply_to screen names and user id's 

@@ -47,7 +47,7 @@ def potential_bias_based_on_retweets(reply_to_sn_dict, non_url_users, screen_nam
             for text in rt:
                 if text in screen_name_list:
                     retweet_bias.append(user)
-
+    return(retweet_bias)
 #see what hashtags non_url users are using
 def non_url_user_hash(user_hash_dict, non_url_users, unique_hash_list):
     hash_users = []
@@ -59,68 +59,20 @@ def non_url_user_hash(user_hash_dict, non_url_users, unique_hash_list):
                     hash_users.append(user)
     return hash_users
 
-liberal_hash_users = non_url_user_hash(user_hash_dict, non_url_users, liberal_unique)
-conservative_hash_users = non_url_user_hash(user_hash_dict, non_url_users, conservative_unique)
-neutral_hash_users = non_url_user_hash(user_hash_dict, non_url_users, neutral_unique)
-unknown_hash = []
-uncertain_users = []
+def positive_and_negative_results(hash_users, retweet_bias):
+	
+	positive = []
+	negative = []
 
-#match hashtag bias with sources bias and try to confirm source bias- are they the same?
-liberal_positive_results = []
-conservative_positive_results = []
-neutral_positive_results = []
-
-liberal_negative_results = []
-conservative_negative_results = []
-neutral_negative_results = []
-
-for user in liberal_hash_users:
-    if user in maybe_liberal_retweet_bias:
-        liberal_positive_results.append(user)
-    else:
-        liberal_negative_results.append(user)
+	for user in hash_users:
+	    if user in retweet_bias:
+	        positive.append(user)
+	    else:
+	        negative.append(user)
 
 
-for user in conservative_hash_users:
-    if user in maybe_conservative_retweet_bias:
-        conservative_positive_results.append(user)
-    else:
-        conservative_negative_results.append(user)
+	print('positive results are ', len(positive))
+	print('negative results are', len(negative))
 
-for user in neutral_hash_users:
-    if user in maybe_neutral_retweet_bias:
-        neutral_positive_results.append(user)
-    else:
-        neutral_negative_results.append(user)
+	return(positive, negative)
 
-# def check_results(user_with_bias, user_maybe):
-# 	positive_results = []
-# 	negative_results = []
-
-# 	for user in user_with_bias:
-# 		if user in user_maybe:
-# 			positive_results.append(user)
-# 		else:
-# 			negative_results.append(user)
-# 	#check code can probs do this in one line 
-
-print(len(liberal_positive_results))
-print(len(conservative_positive_results))
-print(len(neutral_positive_results))
-
-print(len(liberal_negative_results))
-print(len(conservative_negative_results))
-print(len(neutral_negative_results))
-
-print(len(uncertain_users))
-
-def main():
-
-    # define input data file
-    input_data_file = '/Users/Kellie/Desktop/sep_tweets.json'
-    
-    # import user bias from test_user_bias_bubble
-    test_user_bias_bubble.create_and_test_user_bias_matrix(input_data_file)
-
-if __name__ == "__main__":
-    main()
