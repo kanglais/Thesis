@@ -1,4 +1,5 @@
 import test_hashtag_bias_bubble
+import break_tweet_into_dicts
 import numpy as np 
 import json
 from collections import defaultdict
@@ -8,53 +9,40 @@ import pprint
 import pandas as pd
 
 #bias, according to pew research center
-bias = np.array([0.6, 0.6, 0.6, 0.6, 0.6, 0.5, 0.2, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.1, -0.2, -0.2, -0.3,
-		-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.4, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.6, -0.6])
+bias = np.array([0.66, 0.59, 0.63, 0.55, -0.88, 0.52, 0.71, 0.69, 0.62, 0.38, 0.35, 0.72, 0.48, 0.29, 0.25, 0.38, 0.45, 
+	0.36, 0.32, 0.3, -0.62, -0.58, 0.18, -0.51, 0.28, -0.34, 0.21, 0.21, -0.37, 0.25, -0.25, 0.14, 0.14, 0.06, 0.1, 0.1])
+
 
 #news sources as defined by pew research center
-news_sources = np.array(['breitbart', 'limbaugh', 'theblaze', 'hannity', 'glenbeck', 'drudgereport', 'fox',
-				'wallstreetjournal', 'yahoo', 'usatoday', 'abc', 'bloomberg', 'google', 'cbs', 'nbc',
-				'cnn', 'msnbc', 'buzzfeed', 'pbs', 'bbc', 'huffingtonpost', 'washingtonpost', 'economist', 'politico',
-				'dailyshow', 'guardian', 'aljazeera', 'npr', 'colbertreport', 'nytimes', 'slate', 'newyorker'])
+news_sources = np.array(['cnn', 'abc', 'nbc', 'cbs', 'fox', 'msnbc', 'pbs', 'bbc', 'nytimes', 'usatoday', 
+		'wallstreetjournal', 'npr', 'washingtonpost', 'google', 'yahoo', 'huffingtonpost', 'dailyshow', 'colbertreport', 
+		'newyorker', 'economist', 'hannity', 'limbaugh', 'bloomberg', 'glennbeck', 'aljazeera', 'drudgereport', 'guardian', 
+		'politico', 'theblaze', 'motherjones', 'breitbart', 'slate', 'edschultz', 'buzzfeed', 'dailykos', 'thinkprogress'])
 
 def create_and_test_user_bias_matrix(input_data_file):
 
-	with open(input_data_file, 'rb') as raw_url_data:
+	all_users_full_tweets_dict = break_tweet_into_dicts.all_users_full_tweets_dict
 
-		all_users_full_tweets_dict = json.load(raw_url_data)
+	# with open(input_data_file, 'r') as raw_url_data:
+
+	# 	for line in raw_url_data:
+	# 		tweet = json.loads(line)
+
+	# 		all_users_full_tweets_dict[tweet['user']['id_str']] = tweet
+
 	#list of all the user id's 
-	user_ids = list(all_users_full_tweets_dict.keys())
+	user_ids = break_tweet_into_dicts.user_ids
 
 	#break raw tweet dictionary into series of lists containing relevant info 
 	#based on user ids (so order remains the same)
 
-	created_at_list = []
-	reply_to_sn_list = []
-	hashtags_list = []
-	url_full_list = []
-	user_mentions_full_list = []
-	user_id_list = []
-	user_sn_list = []
-
-	count = 0
-
-	for user in user_ids:
-		user_id_list.append(user)
-		
-		for doc in all_users_full_tweets_dict[user]:
-			created_at_list.append(doc['created_at'])
-			
-			user_sn_list.append(doc['user']['screen_name'])
-
-			reply_to_sn_list.append(doc['in_reply_to_screen_name'])
-
-			hashtags_list.append(doc['entities']['hashtags'])
-
-			url_full_list.append(doc['entities']['urls'])
-
-			user_mentions_full_list.append(doc['entities']['user_mentions'])
-			
-			count+=1
+	created_at_list = break_tweet_into_dicts.created_at_list
+	reply_to_sn_list = break_tweet_into_dicts.reply_to_sn_list
+	hashtags_list = break_tweet_into_dicts.hashtags_list
+	url_full_list = break_tweet_into_dicts.url_full_list
+	user_mentions_full_list = break_tweet_into_dicts.user_mentions_full_list
+	user_id_list = break_tweet_into_dicts.user_id_list
+	user_sn_list = break_tweet_into_dicts.user_sn_list
 
 	#create two lists, one of users who use urls as sources and one of users who don't use any urls
 	non_url_users = []
@@ -93,16 +81,16 @@ def create_and_test_user_bias_matrix(input_data_file):
 	neutral_users = []
 
 	for user in users_and_biases:
-		if user[1] > 0.3:
+		if user[1] < -0.01:
 			conservative_users.append(user[0])
-		elif user[1] < -0.3:
+		elif user[1] > 0.3:
 			liberal_users.append(user[0])
 		else:
 			neutral_users.append(user[0])
 			
-	print(len(conservative_users))
-	print(len(liberal_users))
-	print(len(neutral_users))
+	print("cons users ", len(conservative_users))
+	print("lib users ", len(liberal_users))
+	print("neu users ", len(neutral_users))
 
 
 	liberal_tags = test_hashtag_bias_bubble.define_hashtag_bias(user_hash_dict, liberal_users)
@@ -224,9 +212,9 @@ def create_bias_matrix(expanded_url_dict_with_user, news_sources):
 				user_sources.append(root_url_split[0])
 									  
 		for i, source in enumerate(news_sources):            
-			#user_zero_vector_bias[i] = user_sources.count(source)
-			if source in root_url_split:
-				user_zero_vector_bias[i]+=1
+			user_zero_vector_bias[i] = user_sources.count(source)
+			# if source in root_url_split:
+			# 	user_zero_vector_bias[i]+=1
 			
 		bias_value_return_list.append(user_zero_vector_bias)
 		count +=1
@@ -269,7 +257,7 @@ def user_ids_user_bias(url_users, bias_number_user):
 def main():
 
 	# define input data file
-	input_data_file = '/Users/Kellie/Desktop/sep_tweets.json'
+	input_data_file = '/Users/Kellie/Desktop/geotagged_tweets_20160812-0912.json'
 	
 	# generate data structure
 	create_and_test_user_bias_matrix(input_data_file)

@@ -1,4 +1,5 @@
 import create_hashtag_mention_matrix
+import break_tweet_into_dicts
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 import numpy as np
@@ -8,15 +9,13 @@ from sklearn.manifold import TSNE
 from collections import Counter
 
 # define input data file
-input_data_file = '/var/scratch/kenglish/january_hash_mention.json'
+#input_data_file = '/var/scratch/kenglish/january_hash_mention.json'
 
 # access hashtag_clustering file, data from file to use in this script
-normalized_matrix = create_hashtag_mention_matrix.create_initial_data_structure(input_data_file)
+normalized_matrix = create_hashtag_mention_matrix.normalized_matrix
 
-with open(input_data_file, 'rb') as raw_tweet_data:
-
-    # generate python dict from raw json data
-    all_users_terms_dict = json.load(raw_tweet_data)
+# generate python dict from raw json data
+all_users_terms_dict = break_tweet_into_dicts.all_users_terms_dict
 #print(len(all_users_terms_dict))
 
 complete_terms_list = []
@@ -47,7 +46,7 @@ print(sum(pca.explained_variance_ratio_))
 kmeans = KMeans(n_clusters=3)
 kmeans.fit(pca_result)
 
-tsne = TSNE(n_components=3, verbose=1, perplexity=40, n_iter=300)
+tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=300)
 tsne_results = tsne.fit_transform(pca_result).T 
 
 
@@ -57,11 +56,11 @@ print((kmeans.labels_).shape)
 Counter(kmeans.labels_)
 
 #figure size for jupyter notebook
-plt.figure(figsize=(18, 16))
+#plt.figure(figsize=(18, 16))
 
 plt.scatter(tsne_results[0], tsne_results[1], c=kmeans.labels_, cmap=plt.cm.rainbow)
 #plt.show()
-plt.savefig('./viz/kmeans.png')
+plt.savefig('./data/kmeans.png')
 
 cluster_1 = normalized_matrix[np.where(kmeans.labels_ == 1)]
 x_1 = np.sum(cluster_1, axis=0)

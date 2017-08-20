@@ -21,20 +21,21 @@ with open(os.path.join(S_DIR, 'election_tweets_20160812.json'), 'rb') as rf:
 
                 user_topics[tweet['user']['id_str']] = []
 
-            for hashtag in tweet['entities']['hashtags']:
-
-                user_topics[tweet['user']['id_str']].append(hashtag['text'])
-
-            for user in tweet['entities']['user_mentions']:
-
-                user_topics[tweet['user']['id_str']].append(user['screen_name'])
-
+            for created in tweet['created_at']:
+                if 'Jan' in created:
+                    user_topics[tweet['user']['id_str']].append(tweet)
+                elif 'Feb' in created:
+                    user_topics[tweet['user']['id_str']].append(tweet)
+                elif 'Mar' in created:
+                    user_topics[tweet['user']['id_str']].append(tweet)
+                elif 'Apr' in created:
+                    user_topics[tweet['user']['id_str']].append(tweet)
         except:
             print(tweet)
 
         counter+=1
         
-        if counter%10000==0: 
+        if counter%100000==0: 
             print('so far, ' + str(counter))
 
 
